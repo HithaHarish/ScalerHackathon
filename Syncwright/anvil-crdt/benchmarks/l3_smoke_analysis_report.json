@@ -1,0 +1,102 @@
+{
+  "benchmark_returncode": 0,
+  "core_score": {
+    "axes": {
+      "cell-level-strict": true,
+      "cell-level:u1": true,
+      "convergence": true,
+      "fk": true,
+      "order-invariance": true,
+      "randomized": true,
+      "uniqueness:users.email": true
+    },
+    "max": 1.0,
+    "weighted_score": 1.0
+  },
+  "essential_protocols": [
+    "OR-Set row membership with add/remove tags",
+    "Per-cell MV-registers for independent column merges",
+    "Vector-clock max merge with dominance checks",
+    "Post-merge uniqueness grouping with deterministic arbitration",
+    "Conflict log for recoverable uniqueness losers",
+    "Tombstone FK policy with chain repair after writes/imports",
+    "Idempotent pairwise sync and deterministic snapshot hashing"
+  ],
+  "l3_final_score": {
+    "max": 1.0,
+    "value": 1.0,
+    "weights": {
+      "core": 0.6,
+      "stretch": 0.4
+    }
+  },
+  "ollama_error": null,
+  "results": [
+    {
+      "failed_assertions": [],
+      "reason": "reference:\n- Case: Duplicate users, a parent delete, an order pointing at that deleted user, and concurrent column updates are merged across three peers.\n- Risk: This mixes uniqueness, FK policy, tombstones, and cell-level updates in one trace.\n- Mechanism: Rows merge through OR-Set add/remove tags; cells merge through MV-register clocks. Email collisions are grouped after merge and resolved by deterministic arbitration, while the order remains attached to the tombstoned user.\n- Causal note: Concurrent cell writes have no dominance relationship, so name and email changes are preserved independently before visible values are chosen.\n- Result: passed: convergence, uniqueness:users.email, fk:tombstone, cell-level:u1",
+      "reason_provider": "built-in-fallback",
+      "scenario": "reference",
+      "status": "pass"
+    },
+    {
+      "failed_assertions": [],
+      "reason": "cell-level-strict:\n- Case: Two peers update different columns of the same observed row while offline.\n- Risk: A row-level last-writer-wins merge would keep one update and erase the other.\n- Mechanism: Each column has its own MV-register, so the name write and email write merge separately instead of competing at row granularity.\n- Causal note: Because the column writes are concurrent, neither clock dominates the other; dominance is checked per cell, preserving both updates.\n- Result: passed: convergence, cell-level-strict",
+      "reason_provider": "built-in-fallback",
+      "scenario": "cell-level-strict",
+      "status": "pass"
+    },
+    {
+      "failed_assertions": [],
+      "reason": "chaos:seed=1:\n- Case: The reference trace is replayed, but final sync pairs are shuffled by seed.\n- Risk: Order-sensitive metadata can make peers converge per seed but produce different hashes across seeds.\n- Mechanism: Merge uses max vector-clock entries, add/remove tag union, and recomputes conflicts from the merged state instead of from sync history.\n- Causal note: Canonical snapshot hashing ignores benchmark-scoped peer labels, so equivalent causal histories compare the same across sync permutations.\n- Result: passed: convergence, order-invariance",
+      "reason_provider": "built-in-fallback",
+      "scenario": "chaos:seed=1",
+      "status": "pass"
+    },
+    {
+      "failed_assertions": [],
+      "reason": "randomized:seed=101:peers=4:ops=80:\n- Case: Generated inserts, updates, deletes, and syncs are interleaved across multiple peers.\n- Risk: Random orderings expose silent row loss, duplicate email survival, and non-idempotent second syncs.\n- Mechanism: Every inserted row is tracked through OR-Set membership. Email collisions are grouped post-merge; losers stay recoverable through conflict records instead of disappearing.\n- Causal note: Repeated syncs merge the same causal dots and registers, so the second pass should leave the snapshot unchanged.\n- Result: passed: convergence, uniqueness:users.email, idempotent-sync, data-preservation",
+      "reason_provider": "built-in-fallback",
+      "scenario": "randomized:seed=101:peers=4:ops=80",
+      "status": "pass"
+    },
+    {
+      "failed_assertions": [],
+      "reason": "stretch:composite_uniqueness:\n- Case: Peers insert memberships that collide on `(user_id, team_id)` while offline.\n- Risk: Single-column uniqueness logic can miss tuple collisions or drop losing rows.\n- Mechanism: The merged state is grouped by the full composite key. One deterministic winner remains on the original tuple; losers are retained with conflict-safe rewritten unique values and logged original data.\n- Causal note: Winner selection is based on row clocks and stable tie-breaks, so all peers choose the same row after exchanging histories.\n- Result: passed: convergence, composite-uniqueness, data-preservation",
+      "reason_provider": "built-in-fallback",
+      "scenario": "stretch:composite_uniqueness",
+      "status": "pass"
+    },
+    {
+      "failed_assertions": [],
+      "reason": "stretch:multi_level_fk:\n- Case: An organization root is deleted while users and orders beneath it are created or learned on other peers.\n- Risk: FK handling can stop after one level, leaving users or orders pointing at deleted parents.\n- Mechanism: After every write/import, FK repair walks declared references and applies the tombstone policy through the full organization -> users -> orders chain.\n- Causal note: Repair only reacts to known deletes or tombstones, so a child is not removed merely because its parent has not synced in yet.\n- Result: passed: convergence, fk-chain-integrity, data-preservation, data-preservation, data-preservation",
+      "reason_provider": "built-in-fallback",
+      "scenario": "stretch:multi_level_fk",
+      "status": "pass"
+    },
+    {
+      "failed_assertions": [],
+      "reason": "stretch:high_density:\n- Case: Six peers insert the same email concurrently, alongside non-conflicting users.\n- Risk: A replace-style implementation may satisfy uniqueness by silently deleting most inserts.\n- Mechanism: Post-merge grouping by email selects one deterministic winner. The other inserts remain present under conflict-safe email values, with original emails stored in the conflict log.\n- Causal note: All inserts are concurrent, so arbitration uses stable clocks/tie-breaks rather than arrival order.\n- Result: passed: convergence, uniqueness:users.email, data-preservation, uniqueness-winner",
+      "reason_provider": "built-in-fallback",
+      "scenario": "stretch:high_density",
+      "status": "pass"
+    },
+    {
+      "failed_assertions": [],
+      "reason": "stretch:long_run:\n- Case: A longer randomized workload mixes collisions, deletes, updates, and many sync rounds.\n- Risk: Rare interleavings can reveal metadata drift, non-idempotent sync, or conflict rows being lost.\n- Mechanism: Bounded vector clocks, OR-Set rows, per-cell MV-registers, and deterministic uniqueness repair are applied repeatedly after sync.\n- Causal note: Dominated cell versions are compacted, while concurrent versions remain available for deterministic reads and conflict repair.\n- Result: passed: convergence, uniqueness:users.email, data-preservation",
+      "reason_provider": "built-in-fallback",
+      "scenario": "stretch:long_run",
+      "status": "pass"
+    }
+  ],
+  "stretch_score": {
+    "axes": {
+      "composite_uniqueness": true,
+      "high_density": true,
+      "long_run": true,
+      "multi_level_fk": true
+    },
+    "max": 1.0,
+    "weighted_score": 1.0
+  }
+}

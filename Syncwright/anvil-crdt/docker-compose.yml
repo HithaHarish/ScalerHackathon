@@ -1,0 +1,5 @@
+services:
+  anvil-crdt:
+    build: .
+    command: ["python3", "bench/self_check.py", "--adapter", "adapters.myteam:Engine", "--fk-policy", "tombstone", "--quick"]
+

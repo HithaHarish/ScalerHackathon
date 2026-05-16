@@ -1,0 +1,186 @@
+{
+  "benchmark_returncode": 0,
+  "core_score": {
+    "axes": {
+      "cell-level-strict": true,
+      "cell-level:u1": true,
+      "convergence": true,
+      "fk": true,
+      "order-invariance": true,
+      "randomized": true,
+      "uniqueness:users.email": true
+    },
+    "max": 1.0,
+    "weighted_score": 1.0
+  },
+  "essential_protocols": [
+    "OR-Set row membership with add/remove tags",
+    "Per-cell MV-registers for independent column merges",
+    "Vector-clock max merge with dominance checks",
+    "Post-merge uniqueness grouping with deterministic arbitration",
+    "Conflict log for recoverable uniqueness losers",
+    "Tombstone FK policy with chain repair after writes/imports",
+    "Idempotent pairwise sync and deterministic snapshot hashing"
+  ],
+  "l3_final_score": {
+    "max": 1.0,
+    "value": 1.0,
+    "weights": {
+      "core": 0.6,
+      "stretch": 0.4
+    }
+  },
+  "ollama_error": null,
+  "results": [
+    {
+      "failed_assertions": [],
+      "reason": "\u2022 Reference: Duplicate users, a parent delete, an order pointing at that deleted user, and concurrent column updates are merged across three peers.\n\u2022 Risk: The scenario fails to handle the interaction between cell-level updates, FK policies, and uniqueness constraints.\n\u2022 Mechanism: Rows are merged using OR-Set add/remove tags, and cells are merged by synchronizing MV-register clocks, with deterministic arbitration resolving email collisions.\n\u2022 Causal note: The lack of dominance in concurrent cell updates ensures that write operations are preserved independently before visible values are chosen.\n\u2022 Result: The assertions passed for convergence, uniqueness of users.email, tombstone detection, and cell-level update u1, with some potential issues with FK policy propagation and repair.",
+      "reason_provider": "ollama:llama3.2",
+      "scenario": "reference",
+      "status": "pass"
+    },
+    {
+      "failed_assertions": [],
+      "reason": "\u2022 Case: Two peers update different columns of the same observed row while offline. \n\u2022 Risk: A row-level last-writer-wins merge would keep one update and erase the other.\n\u2022 Mechanism: Each column's MV-register ensures that updates are merged independently, avoiding row-level competition.\n\u2022 Causal note: The lack of dominance ensures that both updates are preserved, as each column's write is not dependent on the other.\n\u2022 Result: Convergence and cell-level-strict assertions passed, demonstrating post-merge grouping and deterministic winner selection through independent column updates.",
+      "reason_provider": "ollama:llama3.2",
+      "scenario": "cell-level-strict",
+      "status": "pass"
+    },
+    {
+      "failed_assertions": [],
+      "reason": "\u2022 Case: The reference trace is replayed, but final sync pairs are shuffled by seed.\n\u2022 Risk: Order-sensitive metadata can cause peers to converge per seed but produce different hashes across seeds.\n\u2022 Mechanism: Merge uses max vector-clock entries, add/remove tag union, and recomputes conflicts from the merged state.\n\u2022 Causal note: Clocks and dominance are critical to resolving conflicts correctly after shuffle.\n\u2022 Result: Convergence and order-invariance pass, but the shuffle introduces variability in hash values.",
+      "reason_provider": "ollama:llama3.2",
+      "scenario": "chaos:seed=1",
+      "status": "pass"
+    },
+    {
+      "failed_assertions": [],
+      "reason": "\u2022 Chaos:seed=2: \n  - Case: Peers replay the reference trace, but shuffle final sync pairs based on the seed.\n  - Risk: Order-sensitive metadata can cause peers to converge on different values.\n  - Mechanism: Merge uses max vector-clock entries and recomputes conflicts from the merged state.\n  - Causal note: The use of max vector-clock entries can lead to inconsistencies if clocks are not aligned.\n  - Result: Passes convergence and order-invariance assertions due to post-merge grouping and deterministic winner selection.",
+      "reason_provider": "ollama:llama3.2",
+      "scenario": "chaos:seed=2",
+      "status": "pass"
+    },
+    {
+      "failed_assertions": [],
+      "reason": "\u2022 chaos:seed=3:\n  \u2022 Case: Peers replay the reference trace, but randomize the final sync pairs based on a seed.\n  \u2022 Risk: Order-sensitive metadata can cause peers to converge on different hashes across different seeds.\n  \u2022 Mechanism: The merge process uses a max vector-clock, adds/removes tag unions, and recomputes conflicts from the merged state instead of from sync history.\n  \u2022 Causal note: The canonical snapshot hashing ignores benchmark-scoped peer labels, so equivalent causal histories are compared the same across sync permutations.\n  \u2022 Result: Convergence and order-invariance assertions passed, but order-sensitive metadata introduced potential for differing hashes across seeds.",
+      "reason_provider": "ollama:llama3.2",
+      "scenario": "chaos:seed=3",
+      "status": "pass"
+    },
+    {
+      "failed_assertions": [],
+      "reason": "\u2022 Case: Peers replay reference trace, but final sync pairs are randomized by seed.\n\u2022 Risk: Order-sensitive metadata can lead to different hashes across seeds.\n\u2022 Mechanism: Merge uses a tag union and recomputes conflicts from the merged state.\n\u2022 Causal note: Canonical snapshot hashing is seed-independent.\n\u2022 Result: Passes assertions: convergence and order-invariance, despite randomized seed.",
+      "reason_provider": "ollama:llama3.2",
+      "scenario": "chaos:seed=5",
+      "status": "pass"
+    },
+    {
+      "failed_assertions": [],
+      "reason": "chaos:seed=8:\n\u2022 Case: Peers replay the reference trace with shuffled final sync pairs.\n\u2022 Risk: Metadata convergence leads to different hashes across seeds.\n\u2022 Mechanism: Merge recalculates conflicts from the merged state, ignoring sync history.\n\u2022 Causal note: Canonical snapshot hashing ignores peer labels, preserving equivalent histories.\n\u2022 Result: Pass: Convergence and order-invariance assertions hold due to post-merge grouping and deterministic winner selection.",
+      "reason_provider": "ollama:llama3.2",
+      "scenario": "chaos:seed=8",
+      "status": "pass"
+    },
+    {
+      "failed_assertions": [],
+      "reason": "* Case: Peers simultaneously generate and synchronize changes to the database.\n* Risk: Randomized operations can lead to silent data loss or incorrect results.\n* Mechanism: A deterministic OR-Set tracking system groups post-merge collisions, ensuring recoverability through conflict records.\n* Causal note: The system relies on consistent causal ordering to preserve the integrity of the data.\n* Result: The benchmark scenario passes assertions on convergence, uniqueness of email addresses, idempotent syncing, and data preservation.",
+      "reason_provider": "ollama:llama3.2",
+      "scenario": "randomized:seed=101:peers=4:ops=80",
+      "status": "pass"
+    },
+    {
+      "failed_assertions": [],
+      "reason": "\u2022 Case: Peers continuously generate and synchronize updates, inserts, deletes, and syncs in an interleaved manner.\n\u2022 Risk: Random orderings can lead to silent row loss, duplicate email survival, and non-idempotent second syncs.\n\u2022 Mechanism: The system uses OR-Set membership to track inserted rows, ensuring email collisions are grouped post-merge and recoverable through conflict records.\n\u2022 Causal note: The repeated syncs merge the same causal dots and registers, preserving the snapshot's integrity.\n\u2022 Result: The system passed assertions on convergence, uniqueness of users.email, idempotent-sync, and data-preservation.",
+      "reason_provider": "ollama:llama3.2",
+      "scenario": "randomized:seed=202:peers=4:ops=80",
+      "status": "pass"
+    },
+    {
+      "failed_assertions": [],
+      "reason": "* - Case: Peers generate random inserts, updates, deletes, and syncs, interleaving operations across peers.\n* - Risk: Random orderings can cause silent row loss, duplicate email survival, and non-idempotent second syncs.\n* - Mechanism: Peers use OR-Set membership to track inserted rows, grouping email collisions post-merge with conflict records for recoverable losers.\n* - Causal note: Repeated syncs merge causal dots, preserving the original snapshot, and ensuring no dominance is needed.\n* - Result: The scenario passes convergence, uniqueness, idempotent-sync, and data-preservation assertions.",
+      "reason_provider": "ollama:llama3.2",
+      "scenario": "randomized:seed=303:peers=4:ops=80",
+      "status": "pass"
+    },
+    {
+      "failed_assertions": [],
+      "reason": "\u2022 Case: Peers generate and synchronize inserts, updates, deletes, and syncs in an interleaved manner.\n\u2022 Risk: Random ordering exposes silent row loss, duplicate email survival, and non-idempotent second syncs.\n\u2022 Mechanism: OR-Set tracking for inserted rows with post-merge grouping for email collisions and conflict records for recoverable losers.\n\u2022 Causal note: Repeated syncs preserve causal dots and registers, ensuring a stable snapshot.\n\u2022 Result: Passed assertions include convergence, uniqueness of users.email, idempotent-sync, and data-preservation.",
+      "reason_provider": "ollama:llama3.2",
+      "scenario": "randomized:seed=404:peers=4:ops=80",
+      "status": "pass"
+    },
+    {
+      "failed_assertions": [],
+      "reason": "\u2022 Case: Peers generate and process a mix of inserts, updates, deletes, and syncs in an interleaved manner.\n\u2022 Risk: Failure exposes silent row loss, duplicate email survival, and non-idempotent second syncs due to random orderings.\n\u2022 Mechanism: OR-Set membership tracks inserted rows, allowing for post-merge grouping of email collisions and conflict records for recoverable losers.\n\u2022 Causal note: Repeated syncs merge the same causal dots and registers, ensuring the second pass leaves the snapshot unchanged.\n\u2022 Result: The scenario passes assertions on convergence, uniqueness of users.email, idempotent-sync, and data-preservation, with no silent row loss or non-idempotent second syncs.",
+      "reason_provider": "ollama:llama3.2",
+      "scenario": "randomized:seed=505:peers=4:ops=80",
+      "status": "pass"
+    },
+    {
+      "failed_assertions": [],
+      "reason": "\u2022 Case: Peers generate inserts, updates, deletes, and syncs in an interleaved manner.\n\u2022 Risk: Random orderings can lead to silent row loss and duplicate email survival issues.\n\u2022 Mechanism: OR-Set membership tracks inserted rows, while post-merge grouping handles email collisions, ensuring recoverable losers.\n\u2022 Causal note: Repeated syncs merge the same causal dots, preserving the snapshot's integrity.\n\u2022 Result: The benchmark passed assertions for convergence, uniqueness of 'users.email', idempotent-sync, and data-preservation.",
+      "reason_provider": "ollama:llama3.2",
+      "scenario": "randomized:seed=606:peers=4:ops=80",
+      "status": "pass"
+    },
+    {
+      "failed_assertions": [],
+      "reason": "\u2022 Case: Peers generate a mix of inserts, updates, deletes, and syncs, interleaving their operations.\n\u2022 Risk: The scenario risks silent row loss, duplicate email survival, and non-idempotent second syncs due to random orderings.\n\u2022 Mechanism: OR-Set membership tracks inserted rows, grouping email collisions post-merge, ensuring recoverable losers through conflict records.\n\u2022 Causal note: Repeated syncs maintain the same causal dots and registers, preserving the snapshot.\n\u2022 Result: The scenario passes assertions on convergence, uniqueness, idempotent-sync, and data-preservation.",
+      "reason_provider": "ollama:llama3.2",
+      "scenario": "randomized:seed=707:peers=4:ops=80",
+      "status": "pass"
+    },
+    {
+      "failed_assertions": [],
+      "reason": "\u2022 Case: Peers generate inserts, updates, deletes, and syncs in interleaved order.\n\u2022 Risk: Random orderings expose silent row loss and duplicate email survival issues.\n\u2022 Mechanism: OR-Set tracking and post-merge grouping ensure email collisions can be recovered through conflict records.\n\u2022 Causal note: Clocks and dominance are crucial in maintaining consistent causal dots across repeated syncs.\n\u2022 Result: The scenario passes assertions on convergence, uniqueness, idempotent-sync, and data-preservation.",
+      "reason_provider": "ollama:llama3.2",
+      "scenario": "randomized:seed=808:peers=4:ops=80",
+      "status": "pass"
+    },
+    {
+      "failed_assertions": [],
+      "reason": "\u2022 stretch:composite_uniqueness:\n  \u2022 Case: Peers insert memberships that collide on `(user_id, team_id)` while offline, causing rows to be grouped by the full composite key.\n  \u2022 Risk: Single-column uniqueness logic may drop losing rows due to tuple collisions.\n  \u2022 Mechanism: One deterministic winner remains on the original tuple, with losers retained with conflict-safe rewritten unique values.\n  \u2022 Causal note: Row clocks and stable tie-breaks ensure peers choose the same row after exchanging histories.\n  \u2022 Result: The system passes assertions for convergence, composite uniqueness, and data preservation.",
+      "reason_provider": "ollama:llama3.2",
+      "scenario": "stretch:composite_uniqueness",
+      "status": "pass"
+    },
+    {
+      "failed_assertions": [],
+      "reason": "stretch:multi_level_fk:\n\u2022 Case: When the organization root is deleted, users and orders beneath it are created or learned on other peers.\n\u2022 Risk: FK handling can stop after one level, leaving users or orders pointing at deleted parents.\n\u2022 Mechanism: After every write/import, FK repair walks the full organization -> users -> orders chain, applying the tombstone policy to ensure data integrity.\n\u2022 Causal note: Repair only reacts to known deletes or tombstones, not to pending child removals.\n\u2022 Result: The scenario passes with convergence, fk-chain-integrity, and data-preservation, but may fail on data-preservation due to potential post-merge grouping inconsistencies and deterministic winner selection issues.",
+      "reason_provider": "ollama:llama3.2",
+      "scenario": "stretch:multi_level_fk",
+      "status": "pass"
+    },
+    {
+      "failed_assertions": [],
+      "reason": "\u2022 Case: Six peers insert the same email concurrently, alongside non-conflicting users.\n\u2022 Risk: A replace-style implementation may silently delete most inserts.\n\u2022 Mechanism: Post-merge grouping by email selects one deterministic winner, while preserving original emails in the conflict log.\n\u2022 Causal note: Stable clocks are needed due to concurrent inserts, as tie-breaks can't rely on arrival order.\n\u2022 Result: The scenario passed assertions on convergence, uniqueness of user emails, data preservation, and deterministic winner selection.",
+      "reason_provider": "ollama:llama3.2",
+      "scenario": "stretch:high_density",
+      "status": "pass"
+    },
+    {
+      "failed_assertions": [],
+      "reason": "Here is a compact end-user friendly explanation:\n\n\u2022 **Case**: Peers perform a longer randomized workload with a mix of collisions, deletes, updates, and sync rounds, but without establishing a dominance relation.\n\u2022 **Risk**: Failure can expose metadata drift, non-idempotent sync, or conflict rows being lost due to rare interleavings.\n\u2022 **Mechanism**: Repeated application of bounded vector clocks, OR-Set rows, per-cell MV-registers, and deterministic uniqueness repair ensures data consistency.\n\u2022 **Causal note**: Cell dominance affects the compacting and preservation of concurrent versions.\n\u2022 **Result**: The benchmark passes convergence, preserves uniqueness of `users.email`, and maintains data preservation.",
+      "reason_provider": "ollama:llama3.2",
+      "scenario": "stretch:long_run",
+      "status": "pass"
+    },
+    {
+      "failed_assertions": [],
+      "reason": "stretch:long_run:\n\u2022 Case: Peers handle a mixed workload with random collisions, deletes, updates, and sync rounds using a combination of vector clocks and MV-registers.\n\u2022 Risk: Failure to interleave updates and sync rounds can lead to metadata drift, non-idempotent sync, or loss of conflict rows.\n\u2022 Mechanism: The system applies bounded vector clocks, OR-Set rows, and deterministic uniqueness repair after each sync to ensure data consistency and conflict resolution.\n\u2022 Causal note: Clock dominance and per-cell versioning are crucial to preserve data integrity and enable deterministic reads and conflict repair.\n\u2022 Result: The system passes convergence, preserves user email uniqueness, and maintains data preservation under the randomized workload scenario.",
+      "reason_provider": "ollama:llama3.2",
+      "scenario": "stretch:long_run",
+      "status": "pass"
+    }
+  ],
+  "stretch_score": {
+    "axes": {
+      "composite_uniqueness": true,
+      "high_density": true,
+      "long_run": true,
+      "multi_level_fk": true
+    },
+    "max": 1.0,
+    "weighted_score": 1.0
+  }
+}

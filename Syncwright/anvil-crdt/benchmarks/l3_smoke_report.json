@@ -1,0 +1,1056 @@
+{
+  "l3_version": "anvil-2026-p01-L3-final",
+  "timestamp": "2026-05-16T08:42:46+0530",
+  "adapter": "benchmarks.l3_adapter:Engine",
+  "adapter_path": "/Users/hithaharish/Projects/Scaler/Syncwright/anvil-crdt/benchmarks/l3_adapter.py",
+  "adapter_sha256": "07a02bf32ef7903ae0405b1af8e396be3f1811014330fa83cbf8220e183f6f1f",
+  "fk_policy": "tombstone",
+  "seeds": {
+    "chaos": [
+      1
+    ],
+    "randomized": [
+      101
+    ],
+    "long_run": [
+      31415
+    ],
+    "long_run_ops": 50
+  },
+  "core_score": {
+    "axes": {
+      "convergence": true,
+      "uniqueness:users.email": true,
+      "fk": true,
+      "cell-level:u1": true,
+      "cell-level-strict": true,
+      "order-invariance": true,
+      "randomized": true
+    },
+    "weighted_score": 1.0,
+    "max": 1.0
+  },
+  "stretch_score": {
+    "axes": {
+      "composite_uniqueness": true,
+      "multi_level_fk": true,
+      "high_density": true,
+      "long_run": true
+    },
+    "weighted_score": 1.0,
+    "max": 1.0
+  },
+  "l3_final_score": {
+    "value": 1.0,
+    "max": 1.0,
+    "weights": {
+      "core": 0.6,
+      "stretch": 0.4
+    }
+  },
+  "scenarios": [
+    {
+      "scenario": "reference",
+      "duration_ms": 2.9105409994372167,
+      "snapshot_hashes": {
+        "A": "a9fdac0a5122764b4b8f2c7b31da915d165573a99edc6c18bc29718abb93639a",
+        "B": "a9fdac0a5122764b4b8f2c7b31da915d165573a99edc6c18bc29718abb93639a",
+        "C": "a9fdac0a5122764b4b8f2c7b31da915d165573a99edc6c18bc29718abb93639a"
+      },
+      "state_sample": {
+        "orders": [
+          {
+            "id": "o1",
+            "user_id": "u1",
+            "status": "pending",
+            "total_cents": 1200
+          }
+        ],
+        "users": [
+          {
+            "id": "u2",
+            "email": "bob@x.com",
+            "name": "Bob"
+          },
+          {
+            "id": "u3",
+            "email": "alice@x.com",
+            "name": "Alice2"
+          }
+        ],
+        "_tombstones": [
+          {
+            "key": "users:u1",
+            "tableId": "users",
+            "rowId": "u1",
+            "deletedBy": "C",
+            "deletedAt": {
+              "A": 2,
+              "C": 1
+            },
+            "originalData": {
+              "id": "u1",
+              "email": "alice@x.com",
+              "name": "Alice"
+            },
+            "origin": "explicit"
+          }
+        ]
+      },
+      "assertions": [
+        {
+          "name": "convergence",
+          "passed": true,
+          "detail": "all peers agree on hash a9fdac0a5122\u2026"
+        },
+        {
+          "name": "uniqueness:users.email",
+          "passed": true,
+          "detail": "2 live emails, all distinct"
+        },
+        {
+          "name": "fk:tombstone",
+          "passed": true,
+          "detail": "o1={'id': 'o1', 'user_id': 'u1', 'status': 'pending', 'total_cents': 1200}, live_user_ids=['u2', 'u3']"
+        },
+        {
+          "name": "cell-level:u1",
+          "passed": true,
+          "detail": "u1 absent (cascade) \u2014 vacuously preserved"
+        }
+      ]
+    },
+    {
+      "scenario": "cell-level-strict",
+      "duration_ms": 1.569291000123485,
+      "snapshot_hashes": {
+        "A": "3c862b856e4bfa6c6c5b54e0e40c5b25d5049322275605bb031807162e65fd5f",
+        "B": "3c862b856e4bfa6c6c5b54e0e40c5b25d5049322275605bb031807162e65fd5f",
+        "C": "3c862b856e4bfa6c6c5b54e0e40c5b25d5049322275605bb031807162e65fd5f"
+      },
+      "state_sample": {
+        "orders": [],
+        "users": [
+          {
+            "id": "u1",
+            "email": "alice@ex.org",
+            "name": "Alice Cooper"
+          },
+          {
+            "id": "u2",
+            "email": "bob@x.com",
+            "name": "Bob"
+          }
+        ]
+      },
+      "assertions": [
+        {
+          "name": "convergence",
+          "passed": true,
+          "detail": "all peers agree on hash 3c862b856e4b\u2026"
+        },
+        {
+          "name": "cell-level-strict",
+          "passed": true,
+          "detail": "both concurrent column updates preserved (real cell-level merge)"
+        }
+      ]
+    },
+    {
+      "scenario": "chaos:seed=1",
+      "duration_ms": 3.651332999652368,
+      "snapshot_hashes": {
+        "A": "a9fdac0a5122764b4b8f2c7b31da915d165573a99edc6c18bc29718abb93639a",
+        "B": "a9fdac0a5122764b4b8f2c7b31da915d165573a99edc6c18bc29718abb93639a",
+        "C": "a9fdac0a5122764b4b8f2c7b31da915d165573a99edc6c18bc29718abb93639a"
+      },
+      "state_sample": {
+        "orders": [
+          {
+            "id": "o1",
+            "user_id": "u1",
+            "status": "pending",
+            "total_cents": 1200
+          }
+        ],
+        "users": [
+          {
+            "id": "u2",
+            "email": "bob@x.com",
+            "name": "Bob"
+          },
+          {
+            "id": "u3",
+            "email": "alice@x.com",
+            "name": "Alice2"
+          }
+        ],
+        "_tombstones": [
+          {
+            "key": "users:u1",
+            "tableId": "users",
+            "rowId": "u1",
+            "deletedBy": "C@1",
+            "deletedAt": {
+              "A@1": 2,
+              "C@1": 1
+            },
+            "originalData": {
+              "id": "u1",
+              "email": "alice@x.com",
+              "name": "Alice"
+            },
+            "origin": "explicit"
+          }
+        ]
+      },
+      "assertions": [
+        {
+          "name": "convergence",
+          "passed": true,
+          "detail": "all peers agree on hash a9fdac0a5122\u2026"
+        },
+        {
+          "name": "order-invariance",
+          "passed": true,
+          "detail": "first canonical hash seed=1"
+        }
+      ]
+    },
+    {
+      "scenario": "randomized:seed=101:peers=4:ops=80",
+      "duration_ms": 75.50587500008987,
+      "snapshot_hashes": {
+        "P0": "e27df988a6c02746cc1a12ffb17c48e652297e229b4026df350e5e170b319959",
+        "P1": "e27df988a6c02746cc1a12ffb17c48e652297e229b4026df350e5e170b319959",
+        "P2": "e27df988a6c02746cc1a12ffb17c48e652297e229b4026df350e5e170b319959",
+        "P3": "e27df988a6c02746cc1a12ffb17c48e652297e229b4026df350e5e170b319959"
+      },
+      "state_sample": {
+        "orders": [],
+        "users": [
+          {
+            "id": "u12",
+            "email": "e97354@x.com",
+            "name": "name-68887"
+          },
+          {
+            "id": "u13",
+            "email": "e17881@x.com",
+            "name": "name-322"
+          },
+          {
+            "id": "u14",
+            "email": "e697224@x.com",
+            "name": "name-123"
+          },
+          {
+            "id": "u15",
+            "email": "e219072@x.com",
+            "name": "name-130"
+          },
+          {
+            "id": "u16",
+            "email": "e42473@x.com",
+            "name": "name-49169"
+          }
+        ],
+        "_conflict_log": [
+          {
+            "conflict_id": "users:users_email_key:[\"carol@x.com\"]:u27",
+            "table_name": "users",
+            "constraint_name": "users_email_key",
+            "conflicting_value": "\"carol@x.com\"",
+            "winner_row_id": "u8",
+            "loser_row_id": "u27",
+            "loser_row_data": "{\"email\":\"carol@x.com\",\"id\":\"u27\",\"name\":\"name-93\"}",
+            "detected_at": "logical-time"
+          }
+        ],
+        "_tombstones": [
+          {
+            "key": "users:u0",
+            "tableId": "users",
+            "rowId": "u0",
+            "deletedBy": "R101:P1",
+            "deletedAt": {
+              "R101:P1": 4
+            },
+            "originalData": {
+              "id": "u0",
+              "email": "e376097@x.com",
+              "name": "name-478"
+            },
+            "origin": "explicit"
+          },
+          {
+            "key": "users:u1",
+            "tableId": "users",
+            "rowId": "u1",
+            "deletedBy": "R101:P2",
+            "deletedAt": {
+              "R101:P1": 1,
+              "R101:P2": 6
+            },
+            "originalData": {
+              "id": "u1",
+              "email": "e90335@x.com",
+              "name": "name-70428"
+            },
+            "origin": "explicit"
+          },
+          {
+            "key": "users:u10",
+            "tableId": "users",
+            "rowId": "u10",
+            "deletedBy": "R101:P1",
+            "deletedAt": {
+              "R101:P1": 7
+            },
+            "originalData": {
+              "id": "u10",
+              "email": "e978237@x.com",
+              "name": "name-913"
+            },
+            "origin": "explicit"
+          },
+          {
+            "key": "users:u11",
+            "tableId": "users",
+            "rowId": "u11",
+            "deletedBy": "R101:P1",
+            "deletedAt": {
+              "R101:P1": 6
+            },
+            "originalData": {
+              "id": "u11",
+              "email": "e839132@x.com",
+              "name": "name-922"
+            },
+            "origin": "explicit"
+          },
+          {
+            "key": "users:u2",
+            "tableId": "users",
+            "rowId": "u2",
+            "deletedBy": "R101:P3",
+            "deletedAt": {
+              "R101:P3": 2
+            },
+            "originalData": {
+              "id": "u2",
+              "email": "e829628@x.com",
+              "name": "name-413"
+            },
+            "origin": "explicit"
+          }
+        ]
+      },
+      "assertions": [
+        {
+          "name": "convergence",
+          "passed": true,
+          "detail": "all peers agree on hash e27df988a6c0\u2026"
+        },
+        {
+          "name": "uniqueness:users.email",
+          "passed": true,
+          "detail": "26 live emails, all distinct"
+        },
+        {
+          "name": "idempotent-sync",
+          "passed": true,
+          "detail": "second sync pass left state unchanged"
+        },
+        {
+          "name": "data-preservation",
+          "passed": true,
+          "detail": "all 33 inserted ids in `users` are accounted for"
+        }
+      ]
+    },
+    {
+      "scenario": "stretch:composite_uniqueness",
+      "duration_ms": 3.6777499990421347,
+      "snapshot_hashes": {
+        "A": "fc230d233d2e3e804b5774a518ed0884115b7d56497df5aa029d9b3238e062f8",
+        "B": "fc230d233d2e3e804b5774a518ed0884115b7d56497df5aa029d9b3238e062f8",
+        "C": "fc230d233d2e3e804b5774a518ed0884115b7d56497df5aa029d9b3238e062f8",
+        "D": "fc230d233d2e3e804b5774a518ed0884115b7d56497df5aa029d9b3238e062f8"
+      },
+      "state_sample": {
+        "memberships": [
+          {
+            "id": "m1",
+            "user_id": "u1",
+            "team_id": "t1",
+            "role": "admin"
+          },
+          {
+            "id": "m3",
+            "user_id": "u1",
+            "team_id": "t1#conflict:m3:ac8a15a02bde",
+            "role": "guest"
+          },
+          {
+            "id": "m4",
+            "user_id": "u2",
+            "team_id": "t1",
+            "role": "admin"
+          },
+          {
+            "id": "m5",
+            "user_id": "u1",
+            "team_id": "t2",
+            "role": "member"
+          }
+        ],
+        "_conflict_log": [
+          {
+            "conflict_id": "memberships:memberships_user_id_team_id_key:[\"u1\",\"t1\"]:m3",
+            "table_name": "memberships",
+            "constraint_name": "memberships_user_id_team_id_key",
+            "conflicting_value": "[\"u1\",\"t1\"]",
+            "winner_row_id": "m1",
+            "loser_row_id": "m3",
+            "loser_row_data": "{\"id\":\"m3\",\"role\":\"guest\",\"team_id\":\"t1\",\"user_id\":\"u1\"}",
+            "detected_at": "logical-time"
+          }
+        ],
+        "_tombstones": [
+          {
+            "key": "memberships:m2",
+            "tableId": "memberships",
+            "rowId": "m2",
+            "deletedBy": "L3:composite_uniqueness:B",
+            "deletedAt": {
+              "L3:composite_uniqueness:B": 2,
+              "L3:composite_uniqueness:A": 2
+            },
+            "originalData": {
+              "id": "m2",
+              "user_id": "u1",
+              "team_id": "t1",
+              "role": "member"
+            },
+            "origin": "explicit"
+          }
+        ]
+      },
+      "assertions": [
+        {
+          "name": "convergence",
+          "passed": true,
+          "detail": "all peers agree on hash fc230d233d2e\u2026"
+        },
+        {
+          "name": "composite-uniqueness",
+          "passed": true,
+          "detail": "4 live rows, all (user_id, team_id) pairs distinct"
+        },
+        {
+          "name": "data-preservation",
+          "passed": true,
+          "detail": "all 5 inserted ids in `memberships` are accounted for"
+        }
+      ]
+    },
+    {
+      "scenario": "stretch:multi_level_fk",
+      "duration_ms": 7.701999998971587,
+      "snapshot_hashes": {
+        "A": "02438ccebb9365fa07837b4bd8d91c44fbfea9bcbf74d43d64f9329e7f424559",
+        "B": "02438ccebb9365fa07837b4bd8d91c44fbfea9bcbf74d43d64f9329e7f424559",
+        "C": "02438ccebb9365fa07837b4bd8d91c44fbfea9bcbf74d43d64f9329e7f424559"
+      },
+      "state_sample": {
+        "orders": [
+          {
+            "id": "o3",
+            "user_id": "u3",
+            "status": "pending",
+            "total_cents": 4500
+          }
+        ],
+        "organizations": [
+          {
+            "id": "org2",
+            "name": "Beta"
+          }
+        ],
+        "users": [
+          {
+            "id": "u3",
+            "org_id": "org2",
+            "email": "carol@beta.com"
+          }
+        ],
+        "_tombstones": [
+          {
+            "key": "orders:o1",
+            "tableId": "orders",
+            "rowId": "o1",
+            "deletedBy": "L3:multi_level_fk:C",
+            "deletedAt": {
+              "L3:multi_level_fk:A": 8,
+              "L3:multi_level_fk:C": 1
+            },
+            "originalData": {
+              "id": "o1",
+              "user_id": "u1",
+              "status": "pending",
+              "total_cents": 1200
+            },
+            "origin": "fk"
+          },
+          {
+            "key": "orders:o2",
+            "tableId": "orders",
+            "rowId": "o2",
+            "deletedBy": "L3:multi_level_fk:C",
+            "deletedAt": {
+              "L3:multi_level_fk:A": 8,
+              "L3:multi_level_fk:C": 1
+            },
+            "originalData": {
+              "id": "o2",
+              "user_id": "u1",
+              "status": "shipped",
+              "total_cents": 800
+            },
+            "origin": "fk"
+          },
+          {
+            "key": "orders:o4",
+            "tableId": "orders",
+            "rowId": "o4",
+            "deletedBy": "L3:multi_level_fk:C",
+            "deletedAt": {
+              "L3:multi_level_fk:A": 8,
+              "L3:multi_level_fk:C": 1
+            },
+            "originalData": {
+              "id": "o4",
+              "user_id": "u4",
+              "status": "pending",
+              "total_cents": 2300
+            },
+            "origin": "fk"
+          },
+          {
+            "key": "orders:o5",
+            "tableId": "orders",
+            "rowId": "o5",
+            "deletedBy": "L3:multi_level_fk:C",
+            "deletedAt": {
+              "L3:multi_level_fk:A": 8,
+              "L3:multi_level_fk:C": 1
+            },
+            "originalData": {
+              "id": "o5",
+              "user_id": "u2",
+              "status": "pending",
+              "total_cents": 600
+            },
+            "origin": "fk"
+          },
+          {
+            "key": "organizations:org1",
+            "tableId": "organizations",
+            "rowId": "org1",
+            "deletedBy": "L3:multi_level_fk:C",
+            "deletedAt": {
+              "L3:multi_level_fk:A": 8,
+              "L3:multi_level_fk:C": 1
+            },
+            "originalData": {
+              "id": "org1",
+              "name": "Acme"
+            },
+            "origin": "explicit"
+          },
+          {
+            "key": "users:u1",
+            "tableId": "users",
+            "rowId": "u1",
+            "deletedBy": "L3:multi_level_fk:C",
+            "deletedAt": {
+              "L3:multi_level_fk:A": 8,
+              "L3:multi_level_fk:C": 1
+            },
+            "originalData": {
+              "id": "u1",
+              "org_id": "org1",
+              "email": "alice@acme.com"
+            },
+            "origin": "fk"
+          },
+          {
+            "key": "users:u2",
+            "tableId": "users",
+            "rowId": "u2",
+            "deletedBy": "L3:multi_level_fk:C",
+            "deletedAt": {
+              "L3:multi_level_fk:A": 8,
+              "L3:multi_level_fk:C": 1
+            },
+            "originalData": {
+              "id": "u2",
+              "org_id": "org1",
+              "email": "bob@acme.com"
+            },
+            "origin": "fk"
+          },
+          {
+            "key": "users:u4",
+            "tableId": "users",
+            "rowId": "u4",
+            "deletedBy": "L3:multi_level_fk:C",
+            "deletedAt": {
+              "L3:multi_level_fk:A": 8,
+              "L3:multi_level_fk:C": 1
+            },
+            "originalData": {
+              "id": "u4",
+              "org_id": "org1",
+              "email": "dave@acme.com"
+            },
+            "origin": "fk"
+          }
+        ]
+      },
+      "assertions": [
+        {
+          "name": "convergence",
+          "passed": true,
+          "detail": "all peers agree on hash 02438ccebb93\u2026"
+        },
+        {
+          "name": "fk-chain-integrity",
+          "passed": true,
+          "detail": "chain consistent \u00b7 1 orgs, 1 users, 1 orders"
+        },
+        {
+          "name": "data-preservation",
+          "passed": true,
+          "detail": "all 2 inserted ids in `organizations` are accounted for"
+        },
+        {
+          "name": "data-preservation",
+          "passed": true,
+          "detail": "all 4 inserted ids in `users` are accounted for"
+        },
+        {
+          "name": "data-preservation",
+          "passed": true,
+          "detail": "all 5 inserted ids in `orders` are accounted for"
+        }
+      ]
+    },
+    {
+      "scenario": "stretch:high_density",
+      "duration_ms": 10.301582999090897,
+      "snapshot_hashes": {
+        "A": "8492ab2398599aaccddb83f4e556c0bdf059bdcd2f31be3218507756906c64f8",
+        "B": "8492ab2398599aaccddb83f4e556c0bdf059bdcd2f31be3218507756906c64f8",
+        "C": "8492ab2398599aaccddb83f4e556c0bdf059bdcd2f31be3218507756906c64f8",
+        "D": "8492ab2398599aaccddb83f4e556c0bdf059bdcd2f31be3218507756906c64f8",
+        "E": "8492ab2398599aaccddb83f4e556c0bdf059bdcd2f31be3218507756906c64f8",
+        "F": "8492ab2398599aaccddb83f4e556c0bdf059bdcd2f31be3218507756906c64f8"
+      },
+      "state_sample": {
+        "orders": [],
+        "users": [
+          {
+            "id": "ga",
+            "email": "g.alice@x.com",
+            "name": "Alice-G"
+          },
+          {
+            "id": "gb",
+            "email": "g.bob@x.com",
+            "name": "Bob-G"
+          },
+          {
+            "id": "ua",
+            "email": "admin@x.com",
+            "name": "Alice"
+          },
+          {
+            "id": "ub",
+            "email": "admin@x.com#conflict:ub:08da6417b1f1",
+            "name": "Bob"
+          },
+          {
+            "id": "uc",
+            "email": "admin@x.com#conflict:uc:497f67034446",
+            "name": "Carol"
+          },
+          {
+            "id": "ud",
+            "email": "admin@x.com#conflict:ud:c6aef66e23f5",
+            "name": "Dave"
+          },
+          {
+            "id": "ue",
+            "email": "admin@x.com#conflict:ue:1933e50edfac",
+            "name": "Eve"
+          },
+          {
+            "id": "uf",
+            "email": "admin@x.com#conflict:uf:bb5fe72f091b",
+            "name": "Frank"
+          }
+        ],
+        "_conflict_log": [
+          {
+            "conflict_id": "users:users_email_key:[\"admin@x.com\"]:ub",
+            "table_name": "users",
+            "constraint_name": "users_email_key",
+            "conflicting_value": "\"admin@x.com\"",
+            "winner_row_id": "ua",
+            "loser_row_id": "ub",
+            "loser_row_data": "{\"email\":\"admin@x.com\",\"id\":\"ub\",\"name\":\"Bob\"}",
+            "detected_at": "logical-time"
+          },
+          {
+            "conflict_id": "users:users_email_key:[\"admin@x.com\"]:uc",
+            "table_name": "users",
+            "constraint_name": "users_email_key",
+            "conflicting_value": "\"admin@x.com\"",
+            "winner_row_id": "ua",
+            "loser_row_id": "uc",
+            "loser_row_data": "{\"email\":\"admin@x.com\",\"id\":\"uc\",\"name\":\"Carol\"}",
+            "detected_at": "logical-time"
+          },
+          {
+            "conflict_id": "users:users_email_key:[\"admin@x.com\"]:ud",
+            "table_name": "users",
+            "constraint_name": "users_email_key",
+            "conflicting_value": "\"admin@x.com\"",
+            "winner_row_id": "ua",
+            "loser_row_id": "ud",
+            "loser_row_data": "{\"email\":\"admin@x.com\",\"id\":\"ud\",\"name\":\"Dave\"}",
+            "detected_at": "logical-time"
+          },
+          {
+            "conflict_id": "users:users_email_key:[\"admin@x.com\"]:ue",
+            "table_name": "users",
+            "constraint_name": "users_email_key",
+            "conflicting_value": "\"admin@x.com\"",
+            "winner_row_id": "ua",
+            "loser_row_id": "ue",
+            "loser_row_data": "{\"email\":\"admin@x.com\",\"id\":\"ue\",\"name\":\"Eve\"}",
+            "detected_at": "logical-time"
+          },
+          {
+            "conflict_id": "users:users_email_key:[\"admin@x.com\"]:uf",
+            "table_name": "users",
+            "constraint_name": "users_email_key",
+            "conflicting_value": "\"admin@x.com\"",
+            "winner_row_id": "ua",
+            "loser_row_id": "uf",
+            "loser_row_data": "{\"email\":\"admin@x.com\",\"id\":\"uf\",\"name\":\"Frank\"}",
+            "detected_at": "logical-time"
+          }
+        ]
+      },
+      "assertions": [
+        {
+          "name": "convergence",
+          "passed": true,
+          "detail": "all peers agree on hash 8492ab239859\u2026"
+        },
+        {
+          "name": "uniqueness:users.email",
+          "passed": true,
+          "detail": "8 live emails, all distinct"
+        },
+        {
+          "name": "data-preservation",
+          "passed": true,
+          "detail": "all 8 inserted ids in `users` are accounted for"
+        },
+        {
+          "name": "uniqueness-winner",
+          "passed": true,
+          "detail": "single winner for admin@x.com: id=ua"
+        }
+      ]
+    },
+    {
+      "scenario": "stretch:long_run",
+      "duration_ms": 56.91191699952469,
+      "snapshot_hashes": {
+        "P0": "e8985856064387d4409f8ccfe333d96f1e324f0b49dff5b10a16dc6ff1ba5bf4",
+        "P1": "e8985856064387d4409f8ccfe333d96f1e324f0b49dff5b10a16dc6ff1ba5bf4",
+        "P2": "e8985856064387d4409f8ccfe333d96f1e324f0b49dff5b10a16dc6ff1ba5bf4",
+        "P3": "e8985856064387d4409f8ccfe333d96f1e324f0b49dff5b10a16dc6ff1ba5bf4"
+      },
+      "state_sample": {
+        "orders": [],
+        "users": [
+          {
+            "id": "u0",
+            "email": "e572309@x.com",
+            "name": "name-538"
+          },
+          {
+            "id": "u1",
+            "email": "e764858@x.com",
+            "name": "name-383"
+          },
+          {
+            "id": "u10",
+            "email": "e122046@x.com",
+            "name": "name-298"
+          },
+          {
+            "id": "u11",
+            "email": "alice@x.com#conflict:u11:2cc7fc894f73",
+            "name": "name-614"
+          },
+          {
+            "id": "u12",
+            "email": "e220088@x.com",
+            "name": "name-37150"
+          },
+          {
+            "id": "u14",
+            "email": "e276082@x.com",
+            "name": "name-710"
+          },
+          {
+            "id": "u15",
+            "email": "e364357@x.com",
+            "name": "name-217"
+          },
+          {
+            "id": "u16",
+            "email": "e25449@x.com",
+            "name": "name-483"
+          },
+          {
+            "id": "u17",
+            "email": "e529510@x.com",
+            "name": "name-81"
+          },
+          {
+            "id": "u18",
+            "email": "admin@x.com",
+            "name": "name-839"
+          },
+          {
+            "id": "u19",
+            "email": "e599012@x.com",
+            "name": "name-615"
+          },
+          {
+            "id": "u2",
+            "email": "e12970@x.com",
+            "name": "name-639"
+          },
+          {
+            "id": "u20",
+            "email": "e248408@x.com",
+            "name": "name-38"
+          },
+          {
+            "id": "u21",
+            "email": "e51922@x.com",
+            "name": "name-391"
+          },
+          {
+            "id": "u22",
+            "email": "e613190@x.com",
+            "name": "name-10312"
+          },
+          {
+            "id": "u23",
+            "email": "admin@x.com#conflict:u23:db625919f855",
+            "name": "name-90458"
+          },
+          {
+            "id": "u24",
+            "email": "alice@x.com#conflict:u24:373247ebd53a",
+            "name": "name-529"
+          },
+          {
+            "id": "u25",
+            "email": "bob@x.com#conflict:u25:0fb43774b66c",
+            "name": "name-643"
+          },
+          {
+            "id": "u26",
+            "email": "e944108@x.com",
+            "name": "name-57"
+          },
+          {
+            "id": "u27",
+            "email": "bob@x.com#conflict:u27:18ebf53989ba",
+            "name": "name-787"
+          },
+          {
+            "id": "u28",
+            "email": "root@x.com",
+            "name": "name-50"
+          },
+          {
+            "id": "u29",
+            "email": "e78841@x.com",
+            "name": "name-460"
+          },
+          {
+            "id": "u3",
+            "email": "e555436@x.com",
+            "name": "name-533"
+          },
+          {
+            "id": "u30",
+            "email": "admin@x.com#conflict:u30:b3c1dcb9c767",
+            "name": "name-554"
+          },
+          {
+            "id": "u31",
+            "email": "e895338@x.com",
+            "name": "name-595"
+          },
+          {
+            "id": "u32",
+            "email": "e475698@x.com",
+            "name": "name-732"
+          },
+          {
+            "id": "u4",
+            "email": "bob@x.com",
+            "name": "name-16013"
+          },
+          {
+            "id": "u5",
+            "email": "e3168@x.com",
+            "name": "name-765"
+          },
+          {
+            "id": "u6",
+            "email": "alice@x.com",
+            "name": "name-86"
+          },
+          {
+            "id": "u7",
+            "email": "e1265@x.com",
+            "name": "name-348"
+          },
+          {
+            "id": "u8",
+            "email": "e979399@x.com",
+            "name": "name-654"
+          },
+          {
+            "id": "u9",
+            "email": "e45888@x.com",
+            "name": "name-931"
+          }
+        ],
+        "_conflict_log": [
+          {
+            "conflict_id": "users:users_email_key:[\"admin@x.com\"]:u23",
+            "table_name": "users",
+            "constraint_name": "users_email_key",
+            "conflicting_value": "\"admin@x.com\"",
+            "winner_row_id": "u18",
+            "loser_row_id": "u23",
+            "loser_row_data": "{\"email\":\"admin@x.com\",\"id\":\"u23\",\"name\":\"name-90458\"}",
+            "detected_at": "logical-time"
+          },
+          {
+            "conflict_id": "users:users_email_key:[\"admin@x.com\"]:u30",
+            "table_name": "users",
+            "constraint_name": "users_email_key",
+            "conflicting_value": "\"admin@x.com\"",
+            "winner_row_id": "u18",
+            "loser_row_id": "u30",
+            "loser_row_data": "{\"email\":\"admin@x.com\",\"id\":\"u30\",\"name\":\"name-554\"}",
+            "detected_at": "logical-time"
+          },
+          {
+            "conflict_id": "users:users_email_key:[\"alice@x.com\"]:u11",
+            "table_name": "users",
+            "constraint_name": "users_email_key",
+            "conflicting_value": "\"alice@x.com\"",
+            "winner_row_id": "u6",
+            "loser_row_id": "u11",
+            "loser_row_data": "{\"email\":\"alice@x.com\",\"id\":\"u11\",\"name\":\"name-614\"}",
+            "detected_at": "logical-time"
+          },
+          {
+            "conflict_id": "users:users_email_key:[\"alice@x.com\"]:u24",
+            "table_name": "users",
+            "constraint_name": "users_email_key",
+            "conflicting_value": "\"alice@x.com\"",
+            "winner_row_id": "u6",
+            "loser_row_id": "u24",
+            "loser_row_data": "{\"email\":\"alice@x.com\",\"id\":\"u24\",\"name\":\"name-529\"}",
+            "detected_at": "logical-time"
+          },
+          {
+            "conflict_id": "users:users_email_key:[\"bob@x.com\"]:u25",
+            "table_name": "users",
+            "constraint_name": "users_email_key",
+            "conflicting_value": "\"bob@x.com\"",
+            "winner_row_id": "u4",
+            "loser_row_id": "u25",
+            "loser_row_data": "{\"email\":\"bob@x.com\",\"id\":\"u25\",\"name\":\"name-643\"}",
+            "detected_at": "logical-time"
+          },
+          {
+            "conflict_id": "users:users_email_key:[\"bob@x.com\"]:u27",
+            "table_name": "users",
+            "constraint_name": "users_email_key",
+            "conflicting_value": "\"bob@x.com\"",
+            "winner_row_id": "u4",
+            "loser_row_id": "u27",
+            "loser_row_data": "{\"email\":\"bob@x.com\",\"id\":\"u27\",\"name\":\"name-787\"}",
+            "detected_at": "logical-time"
+          }
+        ],
+        "_tombstones": [
+          {
+            "key": "users:u13",
+            "tableId": "users",
+            "rowId": "u13",
+            "deletedBy": "L3:lr-31415:long_run:P3",
+            "deletedAt": {
+              "L3:lr-31415:long_run:P3": 7,
+              "L3:lr-31415:long_run:P1": 1,
+              "L3:lr-31415:long_run:P0": 2,
+              "L3:lr-31415:long_run:P2": 3
+            },
+            "originalData": {
+              "id": "u13",
+              "email": "e469540@x.com",
+              "name": "name-248"
+            },
+            "origin": "explicit"
+          }
+        ]
+      },
+      "assertions": [
+        {
+          "name": "convergence",
+          "passed": true,
+          "detail": "all peers agree on hash e89858560643\u2026"
+        },
+        {
+          "name": "uniqueness:users.email",
+          "passed": true,
+          "detail": "32 live emails, all distinct"
+        },
+        {
+          "name": "data-preservation",
+          "passed": true,
+          "detail": "all 33 inserted ids in `users` are accounted for"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,80 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R 5 0 R 7 0 R] /Count 3 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> >> >> /Contents 4 0 R >>
+endobj
+4 0 obj
+<< /Length 195 >>
+stream
+BT
+/F1 11 Tf
+72 760 Td
+14 TL
+(Page 1: Lattice Choices and CRDT Type Mapping) Tj
+T*
+() Tj
+T*
+(Rows use an observed-remove set. Inserts add peer/clock tags; deletes remove only observed t) Tj
+T*
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> >> >> /Contents 6 0 R >>
+endobj
+6 0 obj
+<< /Length 174 >>
+stream
+BT
+/F1 11 Tf
+72 760 Td
+14 TL
+(Page 2: Protocol Designs) Tj
+T*
+() Tj
+T*
+(Uniqueness resolution groups rows by unique value after merge. The winner is chosen determin) Tj
+T*
+ET
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> >> >> /Contents 8 0 R >>
+endobj
+8 0 obj
+<< /Length 195 >>
+stream
+BT
+/F1 11 Tf
+72 760 Td
+14 TL
+(Page 3: Metadata Growth and Q&A Preparation) Tj
+T*
+() Tj
+T*
+(Clock metadata is O\(distinct writers\) because each clock is a peer_id to logical_time map. T) Tj
+T*
+ET
+endstream
+endobj
+xref
+0 9
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000127 00000 n 
+0000000302 00000 n 
+0000000548 00000 n 
+0000000723 00000 n 
+0000000948 00000 n 
+0000001123 00000 n 
+trailer
+<< /Size 9 /Root 1 0 R >>
+startxref
+1369
+%%EOF
